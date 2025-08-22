@@ -9,7 +9,7 @@ type Router struct {
 }
 
 func NewRouter() *Router {
-  r := Router{
+  r := &Router{
     routes: make(map[string]map[string]http.HandlerFunc),
   }
 
@@ -22,7 +22,7 @@ func NewRouter() *Router {
 
   })
 
-  return &r
+  return r
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -53,7 +53,7 @@ func (r *Router) Use(lambda func()) {
 }
 
 func (r *Router) addRoute(method string, path string, handler http.HandlerFunc) {
-  if r.routes[method] != nil {
+  if r.routes[method] == nil {
     r.routes[method] = make(map[string]http.HandlerFunc)
   }
 

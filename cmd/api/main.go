@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+  "github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -27,8 +29,12 @@ func getEnv(k, def string) string { if v := os.Getenv(k); v != "" { return v }; 
 func mustEnv(k string) string     { v := os.Getenv(k); if v == "" { log.Fatalf("%s is required", k) }; return v }
 
 func main() {
-  cfg := loadConfig()
+  err := godotenv.Load()
+  if err != nil {
+    log.Fatal("Error loading env file")
+  }
 
+  cfg := loadConfig()
   r := router.NewRouter()
   server := &http.Server{
     Addr: cfg.Addr,
@@ -38,11 +44,8 @@ func main() {
     IdleTimeout: 60 * time.Second,
   }
   
-  go func() {
-    log.Printf("Server starting on addr: %s", server.Addr)
-    if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-      log.Fatal("Server error", err)
-    }
-  }()
+  log.Printf("Server starting on addr: %s", server.Addr)
+  if err := server.ListenAndServe(); err != nil {
+    panic(err)
+  }
 }
-
